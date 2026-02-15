@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: v0.10.4
+
+      - name: Verify toolchain
+        run: |
+          nvim --version | head -n 1
+          make --version | head -n 1
+
+      - name: Run tests
+        run: make test
+
+      - name: Run coverage report
+        run: make coverage-report

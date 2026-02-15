@@ -1,0 +1,10 @@
+.nvimlog
+
+luacov.report.out
+luacov.stats.out
+
+# Editor/local OS noise
+.DS_Store
+*.swp
+*.swo
+*~
