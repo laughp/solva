@@ -734,8 +734,32 @@ local function days_in_month(y, m)
   return mdays[m]
 end
 
-local function date_at_noon(y, m, d)
-  return os.time({ year = y, month = m, day = d, hour = 12, min = 0, sec = 0 })
+-- Civil date conversion helpers (timezone/DST independent).
+-- Based on Howard Hinnant's civil date algorithms.
+local function days_from_civil(y, m, d)
+  local yy = y
+  local mm = m
+  yy = yy - ((mm <= 2) and 1 or 0)
+  local era = math.floor((yy >= 0 and yy or (yy - 399)) / 400)
+  local yoe = yy - era * 400
+  local mp = mm + ((mm > 2) and -3 or 9)
+  local doy = math.floor((153 * mp + 2) / 5) + d - 1
+  local doe = yoe * 365 + math.floor(yoe / 4) - math.floor(yoe / 100) + doy
+  return era * 146097 + doe - 719468
+end
+
+local function civil_from_days(z)
+  local zz = z + 719468
+  local era = math.floor((zz >= 0 and zz or (zz - 146096)) / 146097)
+  local doe = zz - era * 146097
+  local yoe = math.floor((doe - math.floor(doe / 1460) + math.floor(doe / 36524) - math.floor(doe / 146096)) / 365)
+  local y = yoe + era * 400
+  local doy = doe - (365 * yoe + math.floor(yoe / 4) - math.floor(yoe / 100))
+  local mp = math.floor((5 * doy + 2) / 153)
+  local d = doy - math.floor((153 * mp + 2) / 5) + 1
+  local m = mp + ((mp < 10) and 3 or -9)
+  y = y + ((m <= 2) and 1 or 0)
+  return { year = y, month = m, day = d }
 end
 
 local function parse_date_expr(s)
@@ -798,9 +822,8 @@ local function add_months(date, delta)
 end
 
 local function add_days(date, delta_days)
-  local ts = date_at_noon(date.year, date.month, date.day) + (delta_days * 86400)
-  local out = os.date("*t", ts)
-  return { year = out.year, month = out.month, day = out.day }
+  local day_num = days_from_civil(date.year, date.month, date.day)
+  return civil_from_days(day_num + delta_days)
 end
 
 local function apply_duration(date, terms)
@@ -1000,9 +1023,7 @@ local function evaluate_date_math(stripped)
     if not da or not db then
       error("Could not parse one of the dates/times")
     end
-    local tsa = date_at_noon(da.year, da.month, da.day)
-    local tsb = date_at_noon(db.year, db.month, db.day)
-    local diff_days = math.floor((tsb - tsa) / 86400)
+    local diff_days = days_from_civil(db.year, db.month, db.day) - days_from_civil(da.year, da.month, da.day)
     local abs_days = math.abs(diff_days)
     if abs_days == 1 then
       return "1 day"
