@@ -1,5 +1,8 @@
 # solva.nvim
 
+[![CI](https://github.com/laughp/solva/actions/workflows/ci.yml/badge.svg)](https://github.com/laughp/solva/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 `solva.nvim` brings line-by-line calculation to Neovim.
 
 This project is heavily inspired by the [Soulver Mac app](https://soulver.app/).
