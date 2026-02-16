@@ -9,7 +9,7 @@ This project is heavily inspired by the [Soulver Mac app](https://soulver.app/).
 
 Write expressions in a normal text buffer, then see results update in a right-side split (or inline virtual text). It supports variables, units, running totals, line references like `line3`, and common math functions.
 
-![Solva demo](demo.gif)
+![Solva demo](demo2.gif)
 
 ## Highlights
 
